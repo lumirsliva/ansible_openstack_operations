@@ -1,6 +1,5 @@
 ---
 
-
 - name: Create keypair key, network & security group moje and spin tiny cirros image
   vars:
     state: create
