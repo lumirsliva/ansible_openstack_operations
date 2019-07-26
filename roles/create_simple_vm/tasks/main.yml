@@ -1,0 +1,20 @@
+---
+
+
+- name: Create keypair key, network & security group moje and spin tiny cirros image
+  vars:
+    state: create
+    net: moje
+  shell: | 
+    source service.osrc
+    test -f ~/.ssh/id_rsa.pub || ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
+    nova keypair-add --pub-key ~/.ssh/id_rsa.pub key
+    openstack network "{{ state }}" "{{ net }}"
+    openstack subnet "{{ state }}" --network "{{ net }}" --project $OS_PROJECT_NAME --dhcp --subnet-range 192.168.1.0/24 --gateway 192.168.1.1 "{{ net }}"
+    openstack security group "{{ state }}" --project $OS_PROJECT_NAME --project-domain $OS_PROJECT_DOMAIN_NAME "{{ net }}"
+    openstack security group rule "{{ state }}" --protocol tcp --dst-port 22:22 --remote-ip 0.0.0.0/0 moje
+    openstack security group rule "{{ state }}" --protocol icmp moje
+    openstack server "{{ state }}" --flavor 1 --image cirros-0.4.0-x86_64 --security-group "{{ net }}" --network "{{ net }}" testvm
+  args:
+    chdir: /var/lib/ardana
+    executable: /bin/bash

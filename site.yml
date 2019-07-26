@@ -1,0 +1,33 @@
+---
+
+- name: Get host IP
+  hosts: localhost
+  gather_facts: False
+  vars_prompt:
+    - name: IP 
+      prompt: "What is the IP of the Cloud deployer?"
+      private: no
+  tasks:
+    - name: Ansible prompt
+      debug:
+        msg: Cloud deployer is "{{ IP }}"
+    - add_host:
+        name: "{{ IP }}"
+        groups: created_host
+  tags:
+    - getip
+
+
+- name: Configure user and run the rest
+  hosts: created_host
+  remote_user: ardana
+  gather_facts: True
+#  roles:
+#     - create_simple_vm
+  tasks:
+     - name: test
+       debug:
+         msg: test
+     - meta: flush_handlers
+     - include_role:
+         name: create_simple_vm
